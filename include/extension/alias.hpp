@@ -21,7 +21,7 @@ struct IdentifierHasher
 {
 	std::size_t operator()(const Identifier& k) const
 	{
-		// TODO: check efficiency of this method
+		// TODO: TEST efficiency of this method
 		static Hash global_hash = 0; // make rand.seed ?
 		static HashMap global_map;
 		auto name = k.index() == 0 ? std::get<0>(k) 

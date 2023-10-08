@@ -1,6 +1,7 @@
 #pragma once
 
 #include <extension/exception.hpp>
+#include <extension/format.hpp>
 
 namespace einops {
 	
@@ -11,14 +12,14 @@ public:
 		: value(axis)
 		, uuid(++_UUID)
 	{
-		check();
+		TEST();
 	}
 
 	AnonymousAxis(std::string const& axis)
 		: value(std::stoll(axis))
 		, uuid(++_UUID)
 	{
-		check();
+		TEST();
 	}
 
 	AnonymousAxis(AnonymousAxis const& other)
@@ -62,14 +63,14 @@ private:
 	int64_t value;
 	uint64_t uuid;
 
-	inline void check()
+	inline void TEST()
 	{
 		if (value <= 1)
 		{
 			if (value == 1)
 				throw Exception("No need to create anonymous axis of length 1. Report this as an issue");
 			else
-				throw Exception(std::format("Anonymous axis should have positive length, not {}", value));
+				throw Exception(format("Anonymous axis should have positive length, not {}", value));
 		}
 	}
 

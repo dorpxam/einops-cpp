@@ -96,7 +96,7 @@ public:
 			return y;
 		}
 		else
-			throw std::runtime_error(std::format("TorchBackend::reduce : Unknown reduction {}", operation).c_str());
+			throw std::runtime_error(format("TorchBackend::reduce : Unknown reduction {}", operation).c_str());
 	}
 
 	inline Tensor transpose(Tensor const& x, std::vector<int64_t> const& axes) final

@@ -2,6 +2,7 @@
 
 #include <extension/alias.hpp>
 #include <extension/cache.hpp>
+#include <extension/format.hpp>
 #include <extension/hash.hpp>
 #include <extension/tools.hpp>
 
@@ -52,7 +53,7 @@ inline auto isidentifier(std::string const& name) -> bool
 	return true;
 };
 
-// list of python keyword used in the 'check_axis_name' method as warning
+// list of python keyword used in the 'TEST_axis_name' method as warning
 // but not really usefull in C++, but keep that for now (TODO: remove)
 
 const std::vector<std::string> python_keyword =

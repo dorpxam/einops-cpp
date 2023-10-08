@@ -62,7 +62,7 @@ public:
 						 std::string const& file, int line, 
 						 std::string const& func)
 	{
-		checks++; 
+		TESTs++; 
 		if (a == b) 
 		{ 
 			std::cout << "."; 
@@ -85,7 +85,7 @@ public:
 			std::cout << " FAILED (failures=" << fails << ")" << std::endl;
 		else
 			std::cout << " PASSED" << std::endl;
-		std::cout << "Running " << checks << " tests in " << format_duration() << std::endl;
+		std::cout << "Running " << TESTs << " tests in " << format_duration() << std::endl;
 		if (fails) std::cout << serr.str();
 		return fails > 0;
 	}
@@ -108,14 +108,14 @@ public:
 
 private:
 	std::string name;
-	int checks{ 0 }, fails{ 0 };
+	int TESTs{ 0 }, fails{ 0 };
 	std::ostringstream serr;
 	std::chrono::steady_clock::duration duration;
 
 	auto format_duration() -> std::string
 	{
-		return std::format("{} s ({} ms)", double(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count()) / 1000.0,
-										   double(std::chrono::duration_cast<std::chrono::microseconds>(duration).count()) / 1000.0);
+		return format("{} s ({} ms)", double(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count()) / 1000.0,
+									  double(std::chrono::duration_cast<std::chrono::microseconds>(duration).count()) / 1000.0);
 	}
 
 	const int ncols { 120 };
@@ -123,8 +123,6 @@ private:
 	const std::string double_line = std::string(ncols, '=');
 
 public:
-#define CHECK(a,b)  check<std::string>(a, b, #a, #b, __FILE__, __LINE__, __FUNCTION__);
-//#define CHECKI(a,b) check<long long>(a, b, #a, #b, __FILE__, __LINE__, __FUNCTION__);
-#define CHECKT(a)   check<bool>(a, true, #a, "true", __FILE__, __LINE__, __FUNCTION__);
-//#define CHECKS(a,b) check<cs>(a, b, #a, #b, __FILE__, __LINE__, __FUNCTION__);
+#define TESTS(a,b) check<std::string>(a, b, #a, #b, __FILE__, __LINE__, __FUNCTION__);
+#define TESTB(a)   check<bool>(a, true, #a, "true", __FILE__, __LINE__, __FUNCTION__);
 };

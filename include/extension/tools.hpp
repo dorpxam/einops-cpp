@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cwctype>
-#include <format>
 #include <functional>
 #include <iostream>
 #include <locale>

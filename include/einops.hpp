@@ -33,10 +33,10 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 	auto rght = ParsedExpression(rght_str);
 
 	if (!left.has_ellipsis && rght.has_ellipsis)
-		throw Exception(std::format("Ellipsis found in right side, but not left side of a pattern {}", pattern));
+		throw Exception(format("Ellipsis found in right side, but not left side of a pattern {}", pattern));
 
 	if (left.has_ellipsis && left.has_ellipsis_parenthesized)
-		throw Exception(std::format("Ellipsis is parenthesis in the left side is not allowed: {}", pattern));
+		throw Exception(format("Ellipsis is parenthesis in the left side is not allowed: {}", pattern));
 
 	if (operation == "rearrange")
 	{
@@ -46,7 +46,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		auto diff = symmetric_difference(left.identifiers, rght.identifiers);
 
 		if (diff.size() > 0)
-			throw Exception(std::format("Identifiers only on one side of expression (should be on both): {}", print(diff)));
+			throw Exception(format("Identifiers only on one side of expression (should be on both): {}", print(diff)));
 	}
 	else
 	if (operation == "repeat")
@@ -54,7 +54,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		auto diff = difference(left.identifiers, rght.identifiers);
 
 		if (diff.size() > 0)
-			throw Exception(std::format("Unexpected identifiers on the left side of repeat: {}", print(diff)));
+			throw Exception(format("Unexpected identifiers on the left side of repeat: {}", print(diff)));
 
 		Identifiers left_ident;
 		for (auto&& ax : rght.identifiers)
@@ -68,7 +68,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		auto axes_without_size = difference(left_ident, right_ident);
 
 		if (axes_without_size.size() > 0)
-			throw Exception(std::format("Specify sizes for new axes in repeat: {}", print(axes_without_size)));
+			throw Exception(format("Specify sizes for new axes in repeat: {}", print(axes_without_size)));
 	}
 	else
 	if (contains(_reductions, operation)) // TODO: callable using lambda functor !
@@ -76,10 +76,10 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		auto diff = difference(rght.identifiers, left.identifiers);
 
 		if (diff.size() > 0)
-			throw Exception(std::format("Unexpected identifiers on the right side of reduce {}: {}", operation, print(diff)));
+			throw Exception(format("Unexpected identifiers on the right side of reduce {}: {}", operation, print(diff)));
 	}
 	else
-		throw Exception(std::format("Unknown reduction {}. Expect one of {}.", operation, print(_reductions)));
+		throw Exception(format("Unknown reduction {}. Expect one of {}.", operation, print(_reductions)));
 
 	Composition left_composition;
 	Composition rght_composition;
@@ -88,7 +88,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 	{
 		auto n_other_dims = left.composition.size() - 1;
 		if (ndim < n_other_dims)
-			throw Exception(std::format("Wrong shape: expected >={} dims. Received {}-dim tensor.", n_other_dims, ndim));
+			throw Exception(format("Wrong shape: expected >={} dims. Received {}-dim tensor.", n_other_dims, ndim));
 
 		auto ellipsis_ndim = ndim - n_other_dims;
 		std::vector<std::string> ell_axes;
@@ -139,7 +139,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 	else
 	{
 		if (ndim != left.composition.size())
-			throw Exception(std::format("Wrong shape: expected {} dims. Received {}-dim tensor.", left.composition.size(), ndim));
+			throw Exception(format("Wrong shape: expected {} dims. Received {}-dim tensor.", left.composition.size(), ndim));
 
 		left_composition = left.composition;
 		rght_composition = rght.composition;
@@ -183,11 +183,11 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 
 	for (auto&& [elementary_axis, _] : axes_names)
 	{
-		if (!ParsedExpression::check_axis_name(elementary_axis))
-			throw Exception(std::format("Invalid name for an axis {}", print(elementary_axis)));
+		if (!ParsedExpression::TEST_axis_name(elementary_axis))
+			throw Exception(format("Invalid name for an axis {}", print(elementary_axis)));
 
 		if (!axis_name2known_length.contains(elementary_axis))
-			throw Exception(std::format("Axis {} is not used in transform", print(elementary_axis)));
+			throw Exception(format("Axis {} is not used in transform", print(elementary_axis)));
 
 		axis_name2known_length[elementary_axis] = _expected_axis_length;
 	}
@@ -212,7 +212,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 					unknown.insert(axis);
 
 			if (unknown.size() > 1)
-				throw Exception(std::format("Could not infer sizes for {}", print(unknown)));
+				throw Exception(format("Could not infer sizes for {}", print(unknown)));
 
 			assert(unknown.size() + known.size() == comp_axis.size());
 		}
@@ -367,12 +367,12 @@ inline auto _reconstruct_from_shape_uncached(TransformRecipe const& self, Shape 
 		if (unknown_axes.size() == 0)
 		{
 			if (/* TODO */length != known_product)
-				throw Exception(std::format("Shape mismatch, {} != {}", length, known_product));
+				throw Exception(format("Shape mismatch, {} != {}", length, known_product));
 		}
 		else
 		{
 			if (/* TODO */length % known_product != 0)
-				throw Exception(std::format("Shape mismatch, can't divide axis of length {} in chunks of {}", length, known_product));
+				throw Exception(format("Shape mismatch, can't divide axis of length {} in chunks of {}", length, known_product));
 
 			auto unknown_axis = unknown_axes[0];
 			auto inferred_length = int64_t(std::floor(length / known_product));
@@ -574,7 +574,7 @@ inline std::string _compactify_pattern_for_einsum(std::string const& pattern)
 		}
 	
 		if (!axis_name_mapping.contains(axis_name))
-			throw Exception(std::format("Unknown axis {} on right side of einsum {}.", axis_name, pattern));
+			throw Exception(format("Unknown axis {} on right side of einsum {}.", axis_name, pattern));
 
 		compact_pattern += axis_name_mapping[axis_name];
 	}
@@ -610,10 +610,10 @@ auto reduce(Tensor const& tensors, std::string const& pattern, std::string const
 	}
 	catch (Exception const& e)
 	{
-		auto message  = std::format(" Error while processing {}-reduction pattern \"{}\".", reduction, pattern);
-			 message += std::format("\n Input tensor shape: {}. ", print(shape));
-			 message += std::format("Additional info: {}.", print(hashable_axes_lengths));
-		throw Exception(message + std::format("\n {}", e.what()));
+		auto message  = format(" Error while processing {}-reduction pattern \"{}\".", reduction, pattern);
+			 message += format("\n Input tensor shape: {}. ", print(shape));
+			 message += format("Additional info: {}.", print(hashable_axes_lengths));
+		throw Exception(message + format("\n {}", e.what()));
 	}
 }
 

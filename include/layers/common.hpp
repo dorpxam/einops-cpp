@@ -24,7 +24,7 @@ public:
 		}
 		catch (Exception const& e)
 		{
-			throw Exception(" Error while preparing {}\n {}", to_string(), e.what());
+			throw Exception(format(" Error while preparing {}\n {}", to_string(), e.what()));
 		}
 	}
 
@@ -37,8 +37,8 @@ public:
 	{
 		std::string params = _pattern;
 		for (auto&& [axis, length] : _axes_lengths)
-			params += std::format(", {}={}", print(axis), length);
-		return std::format("{}({})", "RearrangeMixin", params);
+			params += format(", {}={}", print(axis), length);
+		return format("{}({})", "RearrangeMixin", params);
 	}
 
 protected:
@@ -68,7 +68,7 @@ public:
 		}
 		catch (Exception const& e)
 		{
-			throw Exception(" Error while preparing {}\n {}", to_string(), e.what());
+			throw Exception(format(" Error while preparing {}\n {}", to_string(), e.what()));
 		}
 	}
 
@@ -79,10 +79,10 @@ public:
 
 	std::string to_string() const
 	{
-		std::string params = std::format("{}, {}", _pattern, _reduction);
+		std::string params = format("{}, {}", _pattern, _reduction);
 		for (auto&& [axis, length] : _axes_lengths)
-			params += std::format(", {}={}", print(axis), length);
-		return std::format("{}({})", "ReduceMixin", params);
+			params += format(", {}={}", print(axis), length);
+		return format("{}({})", "ReduceMixin", params);
 	}
 
 protected:

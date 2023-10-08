@@ -8,6 +8,7 @@
 #include <backends/tensorflow_backend.hpp>
 #endif
 
-#ifndef EINOPS_TORCH_BACKEND || EINOPS_TENSORFLOW_BACKEND
+#if !defined(EINOPS_TORCH_BACKEND) && \
+    !defined(EINOPS_TENSORFLOW_BACKEND)
 #error "einops-cpp: you need at least have one tensor backend included"
 #endif

@@ -38,20 +38,20 @@ public:
 	{
 		auto a = AnonymousAxis("2");
 		auto b = AnonymousAxis("2");
-		CHECKT(a != b);
+		TESTB(a != b);
 		auto c = AnonymousAxisPlaceholder(2);
 		auto d = AnonymousAxisPlaceholder(3);
-		CHECKT(a == c && b == c);
-		CHECKT(a != d && b != d);
+		TESTB(a == c && b == c);
+		TESTB(a != d && b != d);
 	}
 
 	void test_elementary_axis_name()
 	{
 		for (auto&& name : vos{ "a", "b", "h", "dx", "h1", "zz", "i9123", "somelongname", "Alex", "camelCase", "u_n_d_e_r_score", "unreasonablyLongAxisName" })
-			CHECKT(ParsedExpression::check_axis_name(name));
+			TESTB(ParsedExpression::TEST_axis_name(name));
 
 		for (auto&& name : vos{ "", "2b", "12", "_startWithUnderscore", "endWithUnderscore_", "_", "...",  _ellipsis })
-			CHECKT(!ParsedExpression::check_axis_name(name));
+			TESTB(!ParsedExpression::TEST_axis_name(name));
 	}
 
 	void test_invalid_expressions()
@@ -64,25 +64,25 @@ public:
 		{
 			// double ellipsis should raise an error
 			auto _ = ParsedExpression("... a b c d");
-			CHECKT(test_raises_expression("... a b c d ..."));
-			CHECKT(test_raises_expression("... a b c (d ...)"));
-			CHECKT(test_raises_expression("(... a) b c (d ...)"));
+			TESTB(test_raises_expression("... a b c d ..."));
+			TESTB(test_raises_expression("... a b c (d ...)"));
+			TESTB(test_raises_expression("(... a) b c (d ...)"));
 		}
 		{
 			// double/missing/enclosed parenthesis
 			auto _ = ParsedExpression("(a)b c(d ...)");
-			CHECKT(test_raises_expression("(a)) b c (d ...)"));
-			CHECKT(test_raises_expression("(a b c (d ...)"));
-			CHECKT(test_raises_expression("(a) (()) b c (d ...)"));
-			CHECKT(test_raises_expression("(a) ((b c) (d ...))"));
+			TESTB(test_raises_expression("(a)) b c (d ...)"));
+			TESTB(test_raises_expression("(a b c (d ...)"));
+			TESTB(test_raises_expression("(a) (()) b c (d ...)"));
+			TESTB(test_raises_expression("(a) ((b c) (d ...))"));
 		}
 		{
 			// invalid identifiers
 			auto _ = ParsedExpression("camelCase under_scored cApiTaLs ..."); // TODO: unicode 'ß'
-			CHECKT(test_raises_expression("1a"));
-			CHECKT(test_raises_expression("_pre"));
-			CHECKT(test_raises_expression("...pre"));
-			CHECKT(test_raises_expression("pre..."));
+			TESTB(test_raises_expression("1a"));
+			TESTB(test_raises_expression("_pre"));
+			TESTB(test_raises_expression("...pre"));
+			TESTB(test_raises_expression("pre..."));
 		}
 	}
 
@@ -90,56 +90,56 @@ public:
 	{
 		{
 			auto parsed = ParsedExpression("a1  b1   c1    d1");
-			CHECKT(compare(parsed.identifiers, Identifiers{ "a1", "b1", "c1", "d1" }));
-			CHECKT(compare(parsed.composition, Composition{ vos{ "a1" }, vos{ "b1" }, vos{ "c1" }, vos{ "d1" } }));
-			CHECKT(!parsed.has_non_unitary_anonymous_axes);
-			CHECKT(!parsed.has_ellipsis);
+			TESTB(compare(parsed.identifiers, Identifiers{ "a1", "b1", "c1", "d1" }));
+			TESTB(compare(parsed.composition, Composition{ vos{ "a1" }, vos{ "b1" }, vos{ "c1" }, vos{ "d1" } }));
+			TESTB(!parsed.has_non_unitary_anonymous_axes);
+			TESTB(!parsed.has_ellipsis);
 		}
 		{
 			auto parsed = ParsedExpression("() () () ()");
-			CHECKT(compare(parsed.identifiers, Identifiers{}));
-			CHECKT(compare(parsed.composition, Composition{ {}, {}, {}, {} }));
-			CHECKT(!parsed.has_non_unitary_anonymous_axes);
-			CHECKT(!parsed.has_ellipsis);
+			TESTB(compare(parsed.identifiers, Identifiers{}));
+			TESTB(compare(parsed.composition, Composition{ {}, {}, {}, {} }));
+			TESTB(!parsed.has_non_unitary_anonymous_axes);
+			TESTB(!parsed.has_ellipsis);
 		}
 		{
 			auto parsed = ParsedExpression("1 1 1 ()");
-			CHECKT(compare(parsed.identifiers, Identifiers{}));
-			CHECKT(compare(parsed.composition, Composition{ {}, {}, {}, {} }));
-			CHECKT(!parsed.has_non_unitary_anonymous_axes);
-			CHECKT(!parsed.has_ellipsis);
+			TESTB(compare(parsed.identifiers, Identifiers{}));
+			TESTB(compare(parsed.composition, Composition{ {}, {}, {}, {} }));
+			TESTB(!parsed.has_non_unitary_anonymous_axes);
+			TESTB(!parsed.has_ellipsis);
 		}
 		{
 			auto parsed = ParsedExpression("5 (3 4)");
-			CHECKT(parsed.identifiers.size() == 3);
-			CHECK(print(values(parsed.identifiers)), print(std::vector<int64_t>{ 3, 4, 5 }));
-			CHECKT(compare(parsed.composition, Composition{ vos{ aap(5) }, vos{ aap(3), aap(4) } }));
-			CHECKT(parsed.has_non_unitary_anonymous_axes);
-			CHECKT(!parsed.has_ellipsis);
+			TESTB(parsed.identifiers.size() == 3);
+			TESTS(print(values(parsed.identifiers)), print(std::vector<int64_t>{ 3, 4, 5 }));
+			TESTB(compare(parsed.composition, Composition{ vos{ aap(5) }, vos{ aap(3), aap(4) } }));
+			TESTB(parsed.has_non_unitary_anonymous_axes);
+			TESTB(!parsed.has_ellipsis);
 		}
 		{
 			auto parsed = ParsedExpression("5 1 (1 4) 1");
-			CHECKT(parsed.identifiers.size() == 2);
-			CHECK(print(values(parsed.identifiers)), print(std::vector<int64_t>{ 4, 5 }));
-			CHECKT(compare(parsed.composition, Composition{ vos{ aap(5) }, {}, vos{ aap(4) }, {} }));
+			TESTB(parsed.identifiers.size() == 2);
+			TESTS(print(values(parsed.identifiers)), print(std::vector<int64_t>{ 4, 5 }));
+			TESTB(compare(parsed.composition, Composition{ vos{ aap(5) }, {}, vos{ aap(4) }, {} }));
 		}
 		{
 			auto parsed = ParsedExpression("name1 ... a1 12 (name2 14)");
-			CHECKT(parsed.identifiers.size() == 6);
-			CHECKT(difference(parsed.identifiers, Identifiers{ "name1", _ellipsis, "a1", "name2" }).size() == 2);
-			CHECKT(compare(parsed.composition, Composition{ vos{ "name1" }, _ellipsis, vos{ "a1" }, vos{ aap(12) }, vos{ "name2" , aap(14) } }));
-			CHECKT(parsed.has_non_unitary_anonymous_axes);
-			CHECKT(parsed.has_ellipsis);
-			CHECKT(!parsed.has_ellipsis_parenthesized);
+			TESTB(parsed.identifiers.size() == 6);
+			TESTB(difference(parsed.identifiers, Identifiers{ "name1", _ellipsis, "a1", "name2" }).size() == 2);
+			TESTB(compare(parsed.composition, Composition{ vos{ "name1" }, _ellipsis, vos{ "a1" }, vos{ aap(12) }, vos{ "name2" , aap(14) } }));
+			TESTB(parsed.has_non_unitary_anonymous_axes);
+			TESTB(parsed.has_ellipsis);
+			TESTB(!parsed.has_ellipsis_parenthesized);
 		}
 		{
 			auto parsed = ParsedExpression("(name1 ... a1 12) name2 14");
-			CHECKT(parsed.identifiers.size() == 6);
-			CHECKT(difference(parsed.identifiers, Identifiers{ "name1", _ellipsis, "a1", "name2" }).size() == 2);
-			CHECKT(compare(parsed.composition, Composition{ vos{ "name1", _ellipsis, "a1", aap(12) }, vos{ "name2" }, vos{ aap(14) } }));
-			CHECKT(parsed.has_non_unitary_anonymous_axes);
-			CHECKT(parsed.has_ellipsis);
-			CHECKT(parsed.has_ellipsis_parenthesized);
+			TESTB(parsed.identifiers.size() == 6);
+			TESTB(difference(parsed.identifiers, Identifiers{ "name1", _ellipsis, "a1", "name2" }).size() == 2);
+			TESTB(compare(parsed.composition, Composition{ vos{ "name1", _ellipsis, "a1", aap(12) }, vos{ "name2" }, vos{ aap(14) } }));
+			TESTB(parsed.has_non_unitary_anonymous_axes);
+			TESTB(parsed.has_ellipsis);
+			TESTB(parsed.has_ellipsis_parenthesized);
 		}
 	}
 

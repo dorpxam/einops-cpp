@@ -31,11 +31,11 @@ public:
 
 		std::optional<BracketGroup> bracket_group;
 
-		auto add_axis_name = [=, &bracket_group](std::string const& x)
+		auto add_axis_name = [this, &allow_underscore, &allow_duplicates, &bracket_group](std::string const& x)
 		{
 			if (identifiers.contains(x))
 				if (!(allow_underscore && x == "_") && !allow_duplicates)
-					throw Exception(std::format("Indexing expression contains duplicate dimension \"{}\"", x));
+					throw Exception(format("Indexing expression contains duplicate dimension \"{}\"", x));
 
 			if (x == _ellipsis)
 			{
@@ -63,10 +63,10 @@ public:
 			
 					return;
 				} 
-				auto [is_axis_name, reason] = check_axis_name_return_reason(x, allow_underscore);
+				auto [is_axis_name, reason] = TEST_axis_name_return_reason(x, allow_underscore);
 
 				if (!(is_number || is_axis_name))
-					throw Exception(std::format("Invalid axis identifier: {}\n{}", x, reason));
+					throw Exception(format("Invalid axis identifier: {}\n{}", x, reason));
 
 				if (is_number)
 				{
@@ -125,17 +125,17 @@ public:
 			if (isalnum(car) || (car == '_' || car == _ellipsis.front()))
 				current_identifier += car;
 			else
-				throw Exception(std::format("Unknown character '{}'", car));
+				throw Exception(format("Unknown character '{}'", car));
 		}
 
 		if (bracket_group.has_value())
-			throw Exception(std::format("Imbalanced parentheses in expression: \"{}\"", expression));
+			throw Exception(format("Imbalanced parentheses in expression: \"{}\"", expression));
 
 		if (!current_identifier.empty())
 			add_axis_name(current_identifier);
 	}
 
-	static auto check_axis_name_return_reason(std::string const& name, bool allow_underscore = false) -> std::tuple<bool, std::string>
+	static auto TEST_axis_name_return_reason(std::string const& name, bool allow_underscore = false) -> std::tuple<bool, std::string>
 	{
 		if (!isidentifier(name))
 		{
@@ -152,7 +152,7 @@ public:
 		else
 		{
 			if (contains(python_keyword, name))
-				std::cout << std::format("It is discouraged to use axes names that are keywords: {}", name) << std::endl;
+				std::cout << format("It is discouraged to use axes names that are keywords: {}", name) << std::endl;
 
 			if (name == "axis")
 				std::cout << "It is discouraged to use 'axis' as an axis name and will raise an error in future" << std::endl;
@@ -161,9 +161,9 @@ public:
 		}
 	}
 
-	static auto check_axis_name(Identifier const& name) -> bool
+	static auto TEST_axis_name(Identifier const& name) -> bool
 	{
-		auto [is_valid, reason] = ParsedExpression::check_axis_name_return_reason(name.index() == 1 ? std::get<1>(name).to_string() 
+		auto [is_valid, reason] = ParsedExpression::TEST_axis_name_return_reason(name.index() == 1 ? std::get<1>(name).to_string() 
 																									: std::get<0>(name));
 		return is_valid;
 	}
