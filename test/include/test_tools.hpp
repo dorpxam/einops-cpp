@@ -12,6 +12,11 @@ auto arange_and_reshape(int64_t arange, at::IntArrayRef const& reshape)
 	return torch::arange(arange).reshape(reshape);
 }
 
+auto zeros(at::IntArrayRef const& size)
+{
+	return torch::zeros(size);
+}
+
 auto random(at::IntArrayRef const& rnd)
 {
 	return torch::randn(rnd);

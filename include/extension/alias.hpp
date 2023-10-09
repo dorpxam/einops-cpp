@@ -16,28 +16,11 @@ using Reduction = std::string;
 using Reductions = std::vector<std::string>;
 
 using Identifier = std::variant<std::string, AnonymousAxis>;
-
-struct IdentifierHasher
-{
-	std::size_t operator()(const Identifier& k) const
-	{
-		// TODO: TEST efficiency of this method
-		static Hash global_hash = 0; // make rand.seed ?
-		static HashMap global_map;
-		auto name = k.index() == 0 ? std::get<0>(k) 
-								   : std::get<1>(k).to_string();
-		if (global_map.count(name))
-			return global_map[name];
-		auto hash = global_hash++;
-		global_map[name] = hash;
-		return hash;
-	}
-};
-
 using Identifiers = std::set<Identifier>;
-using IdentifiersMap = std::unordered_map<Identifier, int64_t, IdentifierHasher>;
+using IdentifiersMap = std::map<Identifier, int64_t>;
 
 using Composition = std::vector<std::variant<std::vector<std::string>, std::string>>;
+using FlatComposition = std::vector<std::string>;
 using BracketGroup = std::vector<std::string>;
 
 using Axis = int64_t;

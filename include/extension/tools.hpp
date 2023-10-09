@@ -12,6 +12,7 @@
 #include <regex>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <variant>
 #include <vector>
 
@@ -92,6 +93,18 @@ inline auto contains(std::vector<std::vector<T>> const& lhs, std::vector<T> cons
 		if (it == value)
 			return true;
 	return false;
+}
+
+template <typename T>
+inline void insert(std::vector<T>& vec, size_t index, T value)
+{
+	vec.insert(vec.begin() + index, value);
+}
+
+template <typename T>
+inline void remove(std::vector<T>& vec, size_t index)
+{
+	vec.erase(vec.begin() + index);
 }
 
 template <typename T>

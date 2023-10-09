@@ -135,6 +135,16 @@ public:
 			add_axis_name(current_identifier);
 	}
 
+	bool has_composed_axes()
+	{
+		for (auto&& axes : composition) {
+			if (axes.index() == 0)
+				if (std::get<0>(axes).size() > 1)
+					return true;
+		}
+		return false;
+	}
+
 	static auto TEST_axis_name_return_reason(std::string const& name, bool allow_underscore = false) -> std::tuple<bool, std::string>
 	{
 		if (!isidentifier(name))

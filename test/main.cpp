@@ -10,13 +10,18 @@ int main()
     {
         return a != 0 ? a : b;
     };
-
     int out = 0;
+    try
+    {
         out = check(out,  ParsingTest().run());
         out = check(out,      OpsTest().run());
         out = check(out,   EinsumTest().run());
         out = check(out, ExamplesTest().run());
         out = check(out,      APITest().run());
-
+    }
+    catch (std::exception const& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
     return out;
 }

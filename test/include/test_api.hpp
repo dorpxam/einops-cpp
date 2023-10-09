@@ -159,11 +159,18 @@ public:
         }
     }
 
+    void test_parse_shape()
+    {
+        auto x = zeros({ 2, 3, 5, 7 });
+        auto m = parse_shape(x, "batch _ h w");
+    }
+
     void test_list() final
     {
         test_reduce();
         test_rearrange();
         test_repeat();
         test_einsum();
+        test_parse_shape();
     }
 };
