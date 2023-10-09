@@ -30,14 +30,5 @@ public:
 	virtual inline Tensor einsum(std::string const& pattern, std::vector<Tensor> const& tensors) = 0;
 };
 
-template <typename T>
-inline auto sort_and_reverse(std::vector<T> const& in) -> std::vector<T>
-{
-	auto out = std::vector<T>(std::begin(in), std::end(in));
-	std::sort(std::begin(out), std::end(out));
-	std::reverse(std::begin(out), std::end(out));
-	return out;
-}
-
 } // namespace backends
 } // namespace einops

@@ -161,8 +161,17 @@ public:
 
     void test_parse_shape()
     {
-        auto x = zeros({ 2, 3, 5, 7 });
-        auto m = parse_shape(x, "batch _ h w");
+        {
+            // Use underscore to skip the dimension in parsing.
+            auto x = zeros({ 2, 3, 5, 7 });
+            auto m = parse_shape(x, "batch _ h w");
+            TESTS(dump_map(m), "{'batch': 2, 'h': 5, 'w': 7}");
+
+            // `parse_shape` output can be used to specify axes_lengths for other operations:
+            auto y = zeros({ 700 });
+            auto z = rearrange(y, "(b c h w) -> b c h w", parse_shape(x, "b _ h w"));
+            TESTS(dump(z.sizes()), dump({ 2, 10, 5, 7 }));
+        }
     }
 
     void test_list() final

@@ -183,7 +183,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 
 	for (auto&& [elementary_axis, _] : axes_names)
 	{
-		if (!ParsedExpression::TEST_axis_name(elementary_axis))
+		if (!ParsedExpression::check_axis_name(elementary_axis))
 			throw Exception(format("Invalid name for an axis {}", print(elementary_axis)));
 
 		if (!axis_name2known_length.count(elementary_axis))
@@ -592,6 +592,13 @@ inline std::string _compactify_pattern_for_einsum(std::string const& pattern)
 
 } // namespace implementation
 
+/// @brief Provides combination of reordering and reduction using reader-friendly notation.
+/// @param tensor tensor of any supported library (e.g. torch, tensorflow)
+/// list of tensors is also accepted, those should be of the same type and shape
+/// @param pattern string, rearrangement pattern
+/// @param reduction one of available reductions ('min', 'max', 'sum', 'mean', 'prod'), case-sensitive
+/// @param axes_lengths any additional specifications for dimensions
+/// @return tensor of the same type as input.
 template <typename Tensor, typename... Args>
 auto reduce(Tensor const& tensors, std::string const& pattern, std::string const& reduction, Args... axes_lengths)
 {
@@ -604,6 +611,13 @@ auto reduce(Tensor const& tensors, std::string const& pattern, std::string const
 
 	try
 	{
+		if constexpr (sizeof...(axes_lengths) > 0 && are_all_same<AxesLengthsMap, Args...>)
+		{
+			hashable_axes_lengths = from_map(axes_lengths...);
+			auto recipe = _prepare_transformation_recipe(pattern, reduction, hashable_axes_lengths, shape.size());
+			return _apply_recipe(backend, recipe, tensor, reduction, hashable_axes_lengths);
+		}
+		else
 		if constexpr (sizeof...(axes_lengths) > 0)
 		{
 			hashable_axes_lengths = to_vector(std::tuple<Args...>(axes_lengths...));
@@ -618,7 +632,7 @@ auto reduce(Tensor const& tensors, std::string const& pattern, std::string const
 	}
 	catch (Exception const& e)
 	{
-		auto message  = format(" Error while processing {}-reduction pattern \"{}\".", reduction, pattern);
+		auto message  = format("\n\n Error while processing {}-reduction pattern \"{}\".", reduction, pattern);
 			 message += format("\n Input tensor shape: {}. ", print(shape));
 			 message += format("Additional info: {}.", print(hashable_axes_lengths));
 		throw Exception(message + format("\n {}", e.what()));
@@ -631,18 +645,26 @@ auto rearrange(Tensor const& tensor, std::string const& pattern, Args... axes_le
 	return reduce(tensor, pattern, "rearrange", axes_lengths...);
 }
 
+/// @brief Reader-friendly smart element reordering for multidimensional tensors.
+/// This operation includes functionality of transpose (axes permutation), reshape (view), 
+/// squeeze, unsqueeze, stack, concatenate and other operations.
+/// @param tensor tensor of any supported library (e.g. torch, tensorflow)
+/// list of tensors is also accepted, those should be of the same type and shape
+/// @param pattern string, rearrangement pattern
+/// @param axes_lengths any additional specifications for dimensions
+/// @return tensor of the same type as input.
 template <typename Tensor, typename... Args>
 auto repeat(Tensor const& tensor, std::string const& pattern, Args... axes_lengths)
 {
 	return reduce(tensor, pattern, "repeat", axes_lengths...);
 }
 
-/// @brief This method calls einsum operations with einops-style named axes indexing,
+/// @brief Calls einsum operations with einops-style named axes indexing,
 /// computing tensor products with an arbitrary number of tensors. 
 /// Unlike python version, you need to pass pattern first, ant then the tensor(s).
 /// @param pattern string in einops-style.
 /// @param tensor one or more tensor where is type is supported by the backends.
-/// @return a single tensor of the same type as the input.
+/// @return tensor of the same type as input.
 template <typename... Tensor>
 auto einsum(std::string const& pattern, Tensor... tensor)
 {
@@ -654,11 +676,11 @@ auto einsum(std::string const& pattern, Tensor... tensor)
 }
 
 /// @brief Parse a tensor shape to dictionary mapping axes names to their lengths.
-/// @param tensor tensor of any supported framework
+/// @param tensor tensor of any supported library
 /// @param pattern string, space separated names for axes, underscore means skip axis
-/// @return maps axes names to their lengths
+/// @return map of axes names to their lengths
 template <typename Tensor>
-inline auto parse_shape(Tensor const& tensor, std::string const& pattern)
+inline auto parse_shape(Tensor const& tensor, std::string const& pattern) -> implementation::AxesLengthsMap
 {
 	using namespace implementation;
 	auto exp = ParsedExpression(pattern, true);
@@ -670,8 +692,8 @@ inline auto parse_shape(Tensor const& tensor, std::string const& pattern)
 	{
 		FlatComposition composition;
 		for (auto&& value : comp)
-			if (value.index() == 1)
-				composition.push_back(std::get<1>(value));
+			if (value.index() == 0)
+				composition.push_back(std::get<0>(value).front());
 		return composition;
 	};
 	auto composition = flat_composition(exp.composition);
@@ -690,10 +712,10 @@ inline auto parse_shape(Tensor const& tensor, std::string const& pattern)
 		size_t ellipsis_idx = index(composition, _ellipsis);
 						     remove(composition,  ellipsis_idx);
 		for (auto i : iter::range(shape.size() - composition.size() + 1))
-			insert(composition, ellipsis_idx, std::string("_"));
+			insert(composition, ellipsis_idx, "_");
 
 	}
-	std::map<std::string, int64_t> result;
+	AxesLengthsMap result;
 	for (auto [axis_name, axis_length] : iter::zip(composition, shape))
 	{
 		if (axis_name != "_")
@@ -702,21 +724,13 @@ inline auto parse_shape(Tensor const& tensor, std::string const& pattern)
 	return result;
 }
 
-/// @brief This helper is a shortcut for simulating the axes lengths definition in python (like 'ax=5').
-/// @param key axis identifier string
-/// @param value axis length integer 
-/// @return a tuple holding the key & value.
+/// @brief Helper for simulating the axes lengths definition in python (e.g. 'ax=5').
+/// @param key string of the axis identifier 
+/// @param value integer of the axis length
+/// @return tuple holding the key and value.
 inline auto axis(std::string const& key, int64_t const value)
 {
 	return std::make_tuple(key, value);
-}
-
-/// @brief This helper is a shortcut for unfolding a map to variadic template (aka. **parse_shape() in python).
-/// @param map a map of all axis name/length, for example that one generated by parse_shape()
-/// @return a variadic tuples ready to inject in variadic template
-inline auto axes(std::map<std::string, int64_t> const& map)
-{
-	// TODO
 }
 
 } // namespace einops

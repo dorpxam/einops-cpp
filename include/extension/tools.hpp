@@ -51,6 +51,35 @@ inline auto to_vector(const std::tuple<first_type, others...> &t)
         (t, std::make_index_sequence<s>{});
 }
 
+template<class T, class... Rest>
+inline constexpr bool are_all_same = (std::is_same_v<T, Rest> && ...);
+
+inline auto print(std::map<std::string, int64_t> const& values) -> std::string
+{
+	std::string result;
+	for (auto&& [k, v] : values)
+		result += k + " : " + std::to_string(v) + "\n";
+	return result;
+}
+
+template <typename ...Args>
+inline auto from_map(std::map<std::string, int64_t> const& map) -> std::vector<std::tuple<std::string, int64_t>>
+{
+	std::vector<std::tuple<std::string, int64_t>> vec;
+	for (auto&& [k, v] : map)
+		vec.push_back(std::make_tuple(k, v));
+	return vec;
+}
+
+template <typename T>
+inline auto sort_and_reverse(std::vector<T> const& in) -> std::vector<T>
+{
+	auto out = std::vector<T>(std::begin(in), std::end(in));
+	std::sort(std::begin(out), std::end(out));
+	std::reverse(std::begin(out), std::end(out));
+	return out;
+}
+
 template <typename T>
 inline auto compare(T const& lhs, T const& rhs) -> bool
 {
@@ -95,8 +124,8 @@ inline auto contains(std::vector<std::vector<T>> const& lhs, std::vector<T> cons
 	return false;
 }
 
-template <typename T>
-inline void insert(std::vector<T>& vec, size_t index, T value)
+template <typename T1, typename T2>
+inline void insert(std::vector<T1>& vec, size_t index, T2 value)
 {
 	vec.insert(vec.begin() + index, value);
 }

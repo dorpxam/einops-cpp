@@ -3,6 +3,7 @@
 #ifdef EINOPS_TORCH_BACKEND
 
 #include <backends/abstract_backend.hpp>
+#include <extension/tools.hpp>
 #include <torch/torch.h>
 
 namespace einops {
@@ -132,20 +133,6 @@ auto get_backend(Tensor const& tensor) -> std::tuple<TorchBackend, TorchBackend:
 		return { backend, tensor };
 	else
 		throw std::runtime_error("Torch backend only support torch::Tensor, torch::TensorList or a std::vector<torch::Tensor>.");
-}
-
-inline std::string dump(torch::IntArrayRef const& vector)
-{
-	std::string result = "(";
-	for (auto value : vector)
-		result += std::to_string(value) + ", ";
-	result = result.substr(0, result.size() - 2);
-	return result + ")";
-}
-
-inline bool array_equal(torch::Tensor const& lhs, torch::Tensor const& rhs)
-{
-	return dump(lhs.sizes()) == dump(rhs.sizes());
 }
 
 } // namespace backends

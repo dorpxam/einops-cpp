@@ -57,10 +57,10 @@ public:
 	void test_elementary_axis_name()
 	{
 		for (auto&& name : vos{ "a", "b", "h", "dx", "h1", "zz", "i9123", "somelongname", "Alex", "camelCase", "u_n_d_e_r_score", "unreasonablyLongAxisName" })
-			TESTB(ParsedExpression::TEST_axis_name(name));
+			TESTB(ParsedExpression::check_axis_name(name));
 
 		for (auto&& name : vos{ "", "2b", "12", "_startWithUnderscore", "endWithUnderscore_", "_", "...",  _ellipsis })
-			TESTB(!ParsedExpression::TEST_axis_name(name));
+			TESTB(!ParsedExpression::check_axis_name(name));
 	}
 
 	void test_invalid_expressions()

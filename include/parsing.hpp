@@ -63,7 +63,7 @@ public:
 			
 					return;
 				} 
-				auto [is_axis_name, reason] = TEST_axis_name_return_reason(x, allow_underscore);
+				auto [is_axis_name, reason] = check_axis_name_return_reason(x, allow_underscore);
 
 				if (!(is_number || is_axis_name))
 					throw Exception(format("Invalid axis identifier: {}\n{}", x, reason));
@@ -145,7 +145,7 @@ public:
 		return false;
 	}
 
-	static auto TEST_axis_name_return_reason(std::string const& name, bool allow_underscore = false) -> std::tuple<bool, std::string>
+	static auto check_axis_name_return_reason(std::string const& name, bool allow_underscore = false) -> std::tuple<bool, std::string>
 	{
 		if (!isidentifier(name))
 		{
@@ -171,9 +171,9 @@ public:
 		}
 	}
 
-	static auto TEST_axis_name(Identifier const& name) -> bool
+	static auto check_axis_name(Identifier const& name) -> bool
 	{
-		auto [is_valid, reason] = ParsedExpression::TEST_axis_name_return_reason(name.index() == 1 ? std::get<1>(name).to_string() 
+		auto [is_valid, reason] = ParsedExpression::check_axis_name_return_reason(name.index() == 1 ? std::get<1>(name).to_string()
 																									: std::get<0>(name));
 		return is_valid;
 	}

@@ -28,6 +28,7 @@ using Axes = std::vector<int64_t>;
 using AxesMap = std::map<int64_t, int64_t>;
 using AxesNames = std::vector<std::string>;
 using AxesLengths = std::vector<std::tuple<std::string, int64_t>>;
+using AxesLengthsMap = std::map<std::string, int64_t>;
 
 using OptionalAxes = std::optional<Axes>;
 using CompositeAxes = std::vector<Axes>;

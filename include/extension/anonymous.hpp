@@ -4,6 +4,7 @@
 #include <extension/format.hpp>
 
 namespace einops {
+namespace implementation {
 	
 class AnonymousAxis
 {
@@ -38,11 +39,6 @@ public:
 	{
 		return value < other.value;
 	}
-
-	//bool operator== (const AnonymousAxis& other) const
-	//{
-	//	return uuid == other.uuid;
-	//}
 
 	int64_t to_integer() const
 	{
@@ -93,4 +89,5 @@ inline bool operator!=(AnonymousAxis const& lhs, AnonymousAxis const& rhs)
 	return !(lhs == rhs);
 }
 
+} // namespace implementation
 } // namespace einops

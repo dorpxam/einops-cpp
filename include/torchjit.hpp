@@ -8,15 +8,6 @@
 namespace einops {
 namespace backends {
 
-template <typename T>
-inline auto sort_reverse(std::vector<T> const& in) -> std::vector<T>
-{
-	auto out = std::vector<T>(std::begin(in), std::end(in));
-					std::sort(std::begin(out), std::end(out));
-				 std::reverse(std::begin(out), std::end(out));
-	return out;
-}
-	
 class TorchJitBackend
 {
 public:
@@ -37,12 +28,12 @@ public:
 		if (operation == "prod")
 		{
 			auto y = x;
-			for (auto dim : sort_reverse(reduced_axes))
+			for (auto dim : sort_and_reverse(reduced_axes))
 				y = y.prod(dim);
 			return y;
 		}
 		else
-			throw std::runtime_error(std::format("Unknown reduction {}", operation).c_str());
+			throw std::runtime_error(format("Unknown reduction {}", operation).c_str());
 	}
 
 	static torch::Tensor transpose(torch::Tensor const& x, Axes const& axes)

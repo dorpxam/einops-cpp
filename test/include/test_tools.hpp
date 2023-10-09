@@ -28,6 +28,30 @@ auto build_random_images(std::size_t n, at::IntArrayRef const& rnd)
     std::generate_n(std::back_inserter(images), n, [=]() mutable { return torch::randn(rnd); });
     return images;
 };
+
+inline std::string dump(torch::IntArrayRef const& vector)
+{
+	std::string result = "(";
+	for (auto value : vector)
+		result += std::to_string(value) + ", ";
+	result = result.substr(0, result.size() - 2);
+	return result + ")";
+}
+
+inline std::string dump_map(std::map<std::string, int64_t> const& values)
+{
+	std::string result = "{";
+	for (auto&& [k, v] : values)
+		result += "'" + k + "': " + std::to_string(v) + ", ";
+	result = result.substr(0, result.size() - 2);
+	return result + "}";
+}
+
+inline bool array_equal(torch::Tensor const& lhs, torch::Tensor const& rhs)
+{
+	return dump(lhs.sizes()) == dump(rhs.sizes());
+}
+
 #endif
 
 class Timer
