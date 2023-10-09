@@ -170,7 +170,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 	Identifiers repeat_axes_names;
 	for (auto&& axis_name : rght.identifiers)
 	{
-		if (!axis_name2known_length.contains(axis_name))
+		if (!axis_name2known_length.count(axis_name))
 		{
 			insert_in_axis_name2known_length(axis_name);
 			repeat_axes_names.insert(axis_name);
@@ -186,7 +186,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		if (!ParsedExpression::TEST_axis_name(elementary_axis))
 			throw Exception(format("Invalid name for an axis {}", print(elementary_axis)));
 
-		if (!axis_name2known_length.contains(elementary_axis))
+		if (!axis_name2known_length.count(elementary_axis))
 			throw Exception(format("Axis {} is not used in transform", print(elementary_axis)));
 
 		axis_name2known_length[elementary_axis] = _expected_axis_length;
@@ -249,13 +249,13 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		if (axis_name.index() == 0)
 		{
 			for (auto&& axis : std::get<0>(axis_name))
-				if (rght.identifiers.contains(axis))
+				if (rght.identifiers.count(axis))
 					axis_position_after_reduction[axis] = axis_position_after_reduction.size();
 		}
 		else
 		{
 			auto&& axis = std::get<1>(axis_name);
-			if (rght.identifiers.contains(axis))
+			if (rght.identifiers.count(axis))
 				axis_position_after_reduction[axis] = axis_position_after_reduction.size();
 		}
 	}
@@ -291,14 +291,14 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 	std::vector<Identifier> reduced_axes;
 	for (auto&& axis : ordered_axis_left)
 	{
-		if (!rght.identifiers.contains(axis))
+		if (!rght.identifiers.count(axis))
 			reduced_axes.push_back(axis);
 	}
 
 	std::vector<Identifier> order_after_transposition;
 	for (auto&& axis : ordered_axis_rght)
 	{
-		if (left.identifiers.contains(axis))
+		if (left.identifiers.count(axis))
 			order_after_transposition.push_back(axis);
 	}
 
@@ -321,7 +321,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 
 	AxesMap added_axes;
 	for (auto&& [i, axis_name] : iter::enumerate(ordered_axis_rght))
-		if (!left.identifiers.contains(axis_name))
+		if (!left.identifiers.count(axis_name))
 			added_axes[i] = axis_name2position[axis_name];
 
 	auto recipe = TransformRecipe
@@ -547,7 +547,7 @@ inline std::string _compactify_pattern_for_einsum(std::string const& pattern)
 				continue;
 			}
 			
-			if (!axis_name_mapping.contains(axis_name))
+			if (!axis_name_mapping.count(axis_name))
 			{
 				if (i >= output_axis_names.length())
 					throw Exception("Too many axes in einsum.");
@@ -573,7 +573,7 @@ inline std::string _compactify_pattern_for_einsum(std::string const& pattern)
 			continue;
 		}
 	
-		if (!axis_name_mapping.contains(axis_name))
+		if (!axis_name_mapping.count(axis_name))
 			throw Exception(format("Unknown axis {} on right side of einsum {}.", axis_name, pattern));
 
 		compact_pattern += axis_name_mapping[axis_name];

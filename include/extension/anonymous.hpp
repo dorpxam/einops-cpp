@@ -39,10 +39,10 @@ public:
 		return value < other.value;
 	}
 
-	bool operator== (const AnonymousAxis& other) const
-	{
-		return uuid == other.uuid;
-	}
+	//bool operator== (const AnonymousAxis& other) const
+	//{
+	//	return uuid == other.uuid;
+	//}
 
 	int64_t to_integer() const
 	{
@@ -58,6 +58,9 @@ public:
 	{
 		return to_string();
 	}
+
+	friend bool operator==(AnonymousAxis const& lhs, AnonymousAxis const& rhs);
+	friend bool operator!=(AnonymousAxis const& lhs, AnonymousAxis const& rhs);
 
 private:
 	int64_t value;
@@ -79,5 +82,15 @@ private:
 };
 
 uint64_t AnonymousAxis::_UUID { 0 };
+
+inline bool operator==(AnonymousAxis const& lhs, AnonymousAxis const& rhs)
+{
+	return lhs.uuid == rhs.uuid;
+}
+
+inline bool operator!=(AnonymousAxis const& lhs, AnonymousAxis const& rhs)
+{
+	return !(lhs == rhs);
+}
 
 } // namespace einops

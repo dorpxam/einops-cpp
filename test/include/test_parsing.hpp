@@ -20,9 +20,18 @@ public:
 		return std::to_string(value).append("-axis");
 	}
 
-private:
 	int64_t value;
 };
+
+inline bool operator==(AnonymousAxis const& lhs, AnonymousAxisPlaceholder const& rhs)
+{
+	return lhs.to_integer() == rhs.value;
+}
+
+inline bool operator!=(AnonymousAxis const& lhs, AnonymousAxisPlaceholder const& rhs)
+{
+	return !(lhs == rhs);
+}
 
 using aap = AnonymousAxisPlaceholder;
 using vos = std::vector<std::string>;

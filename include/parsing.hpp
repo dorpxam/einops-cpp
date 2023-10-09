@@ -33,7 +33,7 @@ public:
 
 		auto add_axis_name = [this, &allow_underscore, &allow_duplicates, &bracket_group](std::string const& x)
 		{
-			if (identifiers.contains(x))
+			if (identifiers.count(x))
 				if (!(allow_underscore && x == "_") && !allow_duplicates)
 					throw Exception(format("Indexing expression contains duplicate dimension \"{}\"", x));
 

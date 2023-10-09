@@ -1,12 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
 
-// just hack a very simple (C++20) std::format method that not available on gcc 
 template <typename ...Args>
-inline auto format(std::string const& pattern, Args...) -> std::string
+inline auto format(std::string_view const& pattern, const Args&... args) -> std::string
 {
 	return ""; // TODO
 }

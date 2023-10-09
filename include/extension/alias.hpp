@@ -26,7 +26,7 @@ struct IdentifierHasher
 		static HashMap global_map;
 		auto name = k.index() == 0 ? std::get<0>(k) 
 								   : std::get<1>(k).to_string();
-		if (global_map.contains(name))
+		if (global_map.count(name))
 			return global_map[name];
 		auto hash = global_hash++;
 		global_map[name] = hash;
