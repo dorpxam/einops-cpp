@@ -2,7 +2,8 @@
 
 #include <einops.hpp>
 
-namespace einops::implementation {
+namespace einops {
+namespace implementation {
 
 template <typename Tensor>
 class RearrangeMixin
@@ -37,7 +38,7 @@ public:
 	{
 		std::string params = _pattern;
 		for (auto&& [axis, length] : _axes_lengths)
-			params += format(", {}={}", print(axis), length);
+			params += format(", {}={}", print(axis), print(length));
 		return format("{}({})", "RearrangeMixin", params);
 	}
 
@@ -81,7 +82,7 @@ public:
 	{
 		std::string params = format("{}, {}", _pattern, _reduction);
 		for (auto&& [axis, length] : _axes_lengths)
-			params += format(", {}={}", print(axis), length);
+			params += format(", {}={}", print(axis), print(length));
 		return format("{}({})", "ReduceMixin", params);
 	}
 
@@ -92,4 +93,5 @@ protected:
 	AxesLengths _axes_lengths;
 };
 
-} // namespace einops::implementation
+} // namespace implementation
+} // namespace einops

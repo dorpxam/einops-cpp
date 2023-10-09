@@ -4,6 +4,27 @@
 using namespace einops;
 using namespace einops::backends;
 
+#ifdef EINOPS_TORCH_BACKEND
+#include <backends/torch_backend.hpp>
+
+auto arange_and_reshape(int64_t arange, at::IntArrayRef const& reshape)
+{
+	return torch::arange(arange).reshape(reshape);
+}
+
+auto random(at::IntArrayRef const& rnd)
+{
+	return torch::randn(rnd);
+}
+
+auto build_random_images(std::size_t n, at::IntArrayRef const& rnd)
+{
+    std::vector<torch::Tensor> images; images.reserve(n);
+    std::generate_n(std::back_inserter(images), n, [=]() mutable { return torch::randn(rnd); });
+    return images;
+};
+#endif
+
 class Timer
 {
 	using clock = std::chrono::steady_clock;

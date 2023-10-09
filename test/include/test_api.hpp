@@ -13,7 +13,7 @@ public:
     void test_reduce()
     {
         {
-            auto x = torch::randn({ 100, 32, 64 });
+            auto x = random({ 100, 32, 64 });
             {
                 // perform max-reduction on the first axis
                 auto y = reduce(x, "t b c -> b c", "max");
@@ -26,7 +26,7 @@ public:
             }
         }
         {
-            auto x = torch::randn({ 10, 20, 30, 40 });
+            auto x = random({ 10, 20, 30, 40 });
             {
                 // 2d max-pooling with kernel size = 2 * 2 for image processing
                 auto y1 = reduce(x, "b c (h1 h2) (w1 w2) -> b c h1 w1", "max", axis("h2", 2), axis("w2", 2));
@@ -61,12 +61,6 @@ public:
 
     void test_rearrange()
     {
-        auto build_random_images = [](std::size_t n, at::IntArrayRef const& rnd)
-        {
-            std::vector<torch::Tensor> images; images.reserve(n);
-            std::generate_n(std::back_inserter(images), n, [=]() mutable { return torch::randn(rnd); });
-            return images;
-        };
         auto images = build_random_images(32, { 30, 40, 3 });
         {
             // stack along first (batch) axis, output is a single array
@@ -108,7 +102,7 @@ public:
     void test_repeat()
     {
         // a grayscale image (of shape height x width)
-        auto image = torch::randn({ 30, 40 });
+        auto image = random({ 30, 40 });
         {
             // change it to RGB format by repeating in each channel
             auto result = repeat(image, "h w -> h w c", axis("c", 3));
@@ -140,26 +134,26 @@ public:
     void test_einsum()
     {
         {
-            auto x = torch::randn({ 20, 20, 20 });
-            auto y = torch::randn({ 20, 20, 20 });
-            auto z = torch::randn({ 20, 20, 20 });
+            auto x = random({ 20, 20, 20 });
+            auto y = random({ 20, 20, 20 });
+            auto z = random({ 20, 20, 20 });
             auto result = einsum("a b c, c b d, a g k -> a b k", x, y, z);
             TESTS(dump(result.sizes()), dump({ 20, 20, 20 }));
         }
         {
-            auto batched_images = torch::randn({ 128, 16, 16 });
-            auto filters = torch::randn({ 16, 16, 30 });
+            auto batched_images = random({ 128, 16, 16 });
+            auto filters = random({ 16, 16, 30 });
             auto result = einsum("batch h w, h w channel -> batch channel", batched_images, filters);
             TESTS(dump(result.sizes()), dump({ 128, 30 }));
         }
         {
-            auto data = torch::randn({ 50, 30, 20 });
-            auto weights = torch::randn({ 10, 20 });
+            auto data = random({ 50, 30, 20 });
+            auto weights = random({ 10, 20 });
             auto result = einsum("out_dim in_dim, ... in_dim -> ... out_dim", weights, data);
             TESTS(dump(result.sizes()), dump({ 50, 30, 10 }));
         }
         {
-            auto matrix = torch::randn({ 10, 10 });
+            auto matrix = random({ 10, 10 });
             auto result = einsum("i i ->", matrix);
             TESTS(dump(result.sizes()), dump({}));
         }

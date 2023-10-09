@@ -13,7 +13,7 @@ public:
 	{
 		auto test1 = [this](auto x)
 		{
-			torch::Tensor y = rearrange(x, "b c h w -> b h w c");
+			auto y = rearrange(x, "b c h w -> b h w c");
 			TESTS(dump(y.sizes()), dump({ 10, 30, 40, 20 }));
 		};
 
@@ -81,7 +81,7 @@ public:
 			TESTS(dump(y.sizes()), dump({ 30, 10 * 40, 20 }));
 		};
 
-		auto x = torch::arange(10 * 20 * 30 * 40).reshape({ 10, 20, 30, 40 });
+		auto x = arange_and_reshape(static_cast<int64_t>(10 * 20 * 30 * 40), { 10, 20, 30, 40 });
 
 		test1(x);	// transpose
 		test2(x);	// view / reshape

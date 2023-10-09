@@ -1,8 +1,11 @@
 #pragma once
 
+#ifdef EINOPS_TORCH_BACKEND
+
 #include <layers/common.hpp>
 #include <layers/einmix.hpp>
 using namespace einops;
+using namespace einops::backends;
 using namespace einops::implementation;
 
 #include <torchjit.hpp> // _torch_specific in python
@@ -73,3 +76,5 @@ public:
 };
 
 TORCH_MODULE(EinMix);
+
+#endif // EINOPS_TENSORFLOW_BACKEND

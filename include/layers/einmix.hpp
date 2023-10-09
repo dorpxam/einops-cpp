@@ -2,7 +2,8 @@
 
 #include <einops.hpp>
 
-namespace einops::implementation {
+namespace einops {
+namespace implementation {
 
 class _EinmixMixin
 {
@@ -24,4 +25,5 @@ public:
 	}
 };
 
-} // namespace einops::implementation
+} // namespace implementation
+} // namespace einops

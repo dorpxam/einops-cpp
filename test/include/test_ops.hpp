@@ -41,7 +41,7 @@ public:
 
     void test_ellipsis_ops()
     {
-        auto x = torch::arange(2 * 3 * 4 * 5 * 6).reshape({ 2, 3, 4, 5, 6 });
+        auto x = arange_and_reshape(static_cast<int64_t>(2 * 3 * 4 * 5 * 6), { 2, 3, 4, 5, 6 });
         
         for (auto&& pattern : identity_patterns)
             TESTB(array_equal(x, rearrange(x, pattern)));
