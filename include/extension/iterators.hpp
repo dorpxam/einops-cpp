@@ -271,75 +271,9 @@ details::Range<T> range(const T& start, const T& stop, const T& step)
     return details::Range<T>(start, stop, step);
 }
 
-/*
-// Implementing Python’s zip in C++
-// https://debashish-ghosh.medium.com/lets-iterate-together-fd7f5e49672b
-
-namespace details {
-
-template <typename... _Tp>
-bool variadic_or(_Tp &&...args)
-{
-    return (... || args);
-}
-
-template <typename Tuple, std::size_t... I>
-bool any_equals(Tuple&& t1, Tuple&& t2, std::index_sequence<I...>)
-{
-    return variadic_or(std::get<I>(std::forward<Tuple>(t1)) == std::get<I>(std::forward<Tuple>(t2))...);
-}
-
-} // namespace details
-
-template <typename... T>
-struct zip
-{
-    struct iterator
-    {
-        using iterator_category = std::input_iterator_tag;
-        using value_type = std::tuple<std::iter_value_t<std::ranges::iterator_t<T>>...>;
-        using reference = std::tuple<std::iter_reference_t<std::ranges::iterator_t<T>>...>;
-        using difference_type = std::tuple<std::iter_difference_t<std::ranges::iterator_t<T>>...>;
-        using pointer = std::tuple<typename std::iterator_traits<std::ranges::iterator_t<T>>::pointer...>;
-
-        reference operator*()
-        {
-            return std::apply([]<typename... _Tp>(_Tp && ...e) { return std::forward_as_tuple(*std::forward<_Tp>(e)...); }, data_);
-        }
-
-        iterator& operator++()
-        {
-            std::apply([this]<typename... _Tp>(_Tp && ...e) { data_ = std::make_tuple(++std::forward<_Tp>(e)...); }, data_);
-            return *this;
-        }
-
-        auto operator!=(const iterator& iter) const
-        {
-            return !details::any_equals(data_, iter.data_, std::index_sequence_for<T...>{});
-        }
-
-        std::tuple<std::ranges::iterator_t<T>...> data_;
-    };
-
-    zip(T& ...args) 
-        : data(std::forward_as_tuple(std::forward<T>(args)...)) 
-    {}
-
-    auto begin()
-    {
-        return iterator{ std::apply(
-            []<typename... _Tp>(_Tp && ...e) { return std::make_tuple(std::begin(std::forward<_Tp>(e))...); }, data) };
-    }
-
-    auto end()
-    {
-        return iterator{ std::apply(
-            []<typename... _Tp>(_Tp && ...e) { return std::make_tuple(std::end(std::forward<_Tp>(e))...); }, data) };
-    }
-
-    std::tuple<T &...> data;
-};
-*/
+// A C++ Zip Iterator
+// https://committhis.github.io/2020/10/14/zip-iterator.html
+// https://github.com/CommitThis/zip-iterator
 
 namespace details {
 
@@ -414,7 +348,6 @@ private:
     std::tuple<Iters...> m_iters;
 };
 
-// std::decay needed because T is a reference, and is not a complete type
 template <typename T>
 using select_iterator_for = std::conditional_t<
     std::is_const_v<std::remove_reference_t<T>>, 
