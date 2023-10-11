@@ -18,13 +18,7 @@ Just put the `'include'` directory on your compiler path and add the following l
 
 ## Build
 
-**No build is needed** for the library. However, a very basic cmake file is ready to build the test project. It partially follows the different tests of the python project. 
-
-The build was **successful** on different compiler:
-
-*  `Windows 11 | Visual Studio 2022 (MSVC 17.7.4) | Platform Toolkit v143`
-*  `Windows 11 | Visual Studio 2022 (MSVC 17.7.4) | LLVM (Clang-cl)`  
-*  `Ubuntu 22-04 (WSL2) | Visual Code (1.83.0) | GCC 11.3.0`  
+**No build is needed** for the library. However, a very basic cmake file is ready to build the test project. It partially follows the different tests of the python project. Build successfull with MSVC 17.7.4, LLVM-Clang & GCC 11.3 (Ubuntu).  
 
 ## Usage
 
