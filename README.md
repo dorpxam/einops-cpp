@@ -42,10 +42,10 @@ All the following methods in the public C++ API are documented. For a better und
 ## Status
 
 - [x] Follow the code of the python release `v0.7.0` [release](https://github.com/arogozhnikov/einops/releases/tag/v0.7.0)
-- [x] Fully implements the `reduce()`, `rearrange()`, `repeat()`, `einsum()` and `parse_shape()` methods.
+- [x] Implements the `reduce()`, `rearrange()`, `repeat()`, `einsum()` and `parse_shape()` methods.
 - [ ] Finalize the code of the `Rearrange`, `Reduce` and `EinMix` layers (aka `torch::Module`)
-- [ ] Need to benchmark the LRU cache in few internal methods
-- [ ] Should optimize the code where possible (limit potential overhead)
+- [ ] Benchmark the LRU cache in few internal methods
+- [ ] Optimize the code where possible (limit potential overhead)
 
 ## Contributing
 
