@@ -9,14 +9,12 @@ template <class Tensor>
 class AbstractBackend
 {
 public:
-	using Shape = std::vector<int64_t>;
-
 	virtual ~AbstractBackend() = default;
 
 	virtual inline bool is_float_type(Tensor const& x) const = 0;
 
-	virtual inline Shape shape(Tensor const& x) = 0;
-	virtual inline Tensor reshape(Tensor const& x, Shape const& shape) = 0;
+	virtual inline std::vector<int64_t> shape(Tensor const& x) = 0;
+	virtual inline Tensor reshape(Tensor const& x, std::vector<int64_t> const& shape) = 0;
 
 	virtual inline Tensor add_axis(Tensor const& x, int64_t new_position) = 0;
 	virtual inline Tensor add_axes(Tensor const& x, int64_t n_axes, std::map<int64_t, int64_t> const& pos2len) = 0;

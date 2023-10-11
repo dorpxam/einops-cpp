@@ -9,6 +9,7 @@
 #include <map>
 #include <numeric>
 #include <optional>
+#include <random>
 #include <regex>
 #include <set>
 #include <string>
@@ -49,6 +50,51 @@ inline auto to_vector(const std::tuple<first_type, others...> &t)
 
     return to_vector_helper<first_type, tuple_type>
         (t, std::make_index_sequence<s>{});
+}
+
+// Convert a vector<T> to initializer_list<T>
+// https://stackoverflow.com/questions/18895583/convert-a-vectort-to-initializer-listt
+
+namespace implementation {
+
+constexpr size_t DEFAULT_MAX_LENGTH = 128;
+
+template <typename V> struct backingValue { static V value; };
+template <typename V> V backingValue<V>::value;
+
+template <typename V, typename... Vcount> struct backingList { static std::initializer_list<V> list; };
+template <typename V, typename... Vcount>
+std::initializer_list<V> backingList<V, Vcount...>::list = { (Vcount)backingValue<V>::value... };
+
+template <size_t maxLength, typename It, typename V = typename It::value_type, typename... Vcount>
+static typename std::enable_if< sizeof...(Vcount) >= maxLength,
+	std::initializer_list<V> >::type generate_n(It begin, It end, It current)
+{
+	throw std::length_error("More than maxLength elements in range.");
+}
+
+template <size_t maxLength = DEFAULT_MAX_LENGTH, typename It, typename V = typename It::value_type, typename... Vcount>
+static typename std::enable_if < sizeof...(Vcount) < maxLength,
+	std::initializer_list<V> > ::type generate_n(It begin, It end, It current)
+{
+	if (current != end)
+		return generate_n<maxLength, It, V, V, Vcount...>(begin, end, ++current);
+
+	current = begin;
+	for (auto it = backingList<V, Vcount...>::list.begin();
+		it != backingList<V, Vcount...>::list.end();
+		++current, ++it)
+		*const_cast<V*>(&*it) = *current;
+
+	return backingList<V, Vcount...>::list;
+}
+
+} // namespace implementation
+
+template <typename Iterator>
+inline auto to_initializer_list(Iterator begin, Iterator end) -> std::initializer_list<typename Iterator::value_type>
+{
+	return implementation::generate_n(begin, end, begin);
 }
 
 template<class T, class... Rest>
@@ -209,8 +255,8 @@ inline auto replace(std::string data, std::string const& to_search, std::string 
 
 inline auto isdecimal(std::string const& str_num) -> bool
 {
-	int i = 0;
-	int str_len = str_num.size();
+	size_t i = 0;
+	size_t str_len = str_num.size();
 	while (i < str_len && str_num[i] == ' ')
 		i++;
 	if (i < str_len && (str_num[i] == '+' || str_num[i] == '-'))

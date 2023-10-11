@@ -9,7 +9,3 @@ target_include_directories(einops_test INTERFACE ${PROJECT_SOURCE_DIR}/include)
 if (ENABLE_EINOPS_TORCH_BACKEND)
     target_link_libraries(einops_test ${TORCH_LIBRARIES})
 endif()
-
-#if (EINOPS_TENSORFLOW_BACKEND)
-#    target_link_libraries(einops_test ${TENSORFLOW_LIBRARIES})
-#endif()

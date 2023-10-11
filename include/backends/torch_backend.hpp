@@ -22,12 +22,12 @@ public:
 				x.dtype() == torch::kBFloat16) ? true : false;
 	}
 
-	inline Shape shape(Tensor const& x) final
+	inline std::vector<int64_t> shape(Tensor const& x) final
 	{
 		return x.sizes().vec();
 	}
 
-	inline Tensor reshape(Tensor const& x, Shape const& shape) final
+	inline Tensor reshape(Tensor const& x, std::vector<int64_t> const& shape) final
 	{
 		return x.reshape(shape);
 	}

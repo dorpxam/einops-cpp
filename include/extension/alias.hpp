@@ -10,6 +10,7 @@ using Length = int64_t;
 using Lengths = std::vector<int64_t>;
 using Position = int64_t;
 using Shape = std::vector<int64_t>;
+using Shapes = std::vector<Shape>;
 
 using Pattern = std::string;
 using Reduction = std::string;
@@ -41,10 +42,10 @@ struct TransformRecipe
 	IdentifiersMap axis_name2elementary_axis;
 	InputCompositeAxes input_composition_known_unknown;
 	Axes axes_permutation;
-	Axis first_reduced_axis;
+	Axis first_reduced_axis{ -1 };
 	AxesMap added_axes;
 	OutputCompositeAxes output_composite_axes;
-	Hash hash; // trick for LRU cache
+	Hash hash{ 0 }; // trick for LRU cache
 };
 
 using MultiRecipe = std::map<int64_t, TransformRecipe>;

@@ -86,7 +86,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 
 	if (left.has_ellipsis)
 	{
-		auto n_other_dims = left.composition.size() - 1;
+		auto n_other_dims = static_cast<int>(left.composition.size() - 1);
 		if (ndim < n_other_dims)
 			throw Exception(format("Wrong shape: expected >={} dims. Received {}-dim tensor.", n_other_dims, ndim));
 

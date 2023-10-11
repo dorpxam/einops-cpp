@@ -3,36 +3,65 @@
 #include <einops.hpp>
 using namespace einops;
 using namespace einops::backends;
+using namespace einops::implementation;
 
-#ifdef EINOPS_TORCH_BACKEND
+#if defined (EINOPS_TORCH_BACKEND)
+
 #include <backends/torch_backend.hpp>
 
-auto arange_and_reshape(int64_t arange, at::IntArrayRef const& reshape)
+inline auto arange_and_reshape(int64_t arange, at::IntArrayRef const& reshape)
 {
 	return torch::arange(arange).reshape(reshape);
 }
 
-auto zeros(at::IntArrayRef const& size)
+inline auto zeros(at::IntArrayRef const& size)
 {
 	return torch::zeros(size);
 }
 
-auto random(at::IntArrayRef const& rnd)
+inline auto random(at::IntArrayRef const& rnd)
 {
 	return torch::randn(rnd);
 }
 
-auto build_random_images(std::size_t n, at::IntArrayRef const& rnd)
+inline auto randoms(std::size_t n, at::IntArrayRef const& rnd)
 {
     std::vector<torch::Tensor> images; images.reserve(n);
     std::generate_n(std::back_inserter(images), n, [=]() mutable { return torch::randn(rnd); });
     return images;
-};
+}
+
+inline auto substract(torch::Tensor const& x, torch::Tensor const& y)
+{
+	return x - y;
+}
 
 inline std::string dump(torch::IntArrayRef const& vector)
 {
 	std::string result = "(";
 	for (auto value : vector)
+		result += std::to_string(value) + ", ";
+	result = result.substr(0, result.size() - 2);
+	return result + ")";
+}
+
+inline std::string dump(torch::Tensor const& tensor)
+{
+	return dump(tensor.sizes());
+}
+
+inline bool array_equal(torch::Tensor const& lhs, torch::Tensor const& rhs)
+{
+	return dump(lhs.sizes()) == dump(rhs.sizes());
+}
+
+#endif // EINOPS_BACKEND
+
+template <typename T>
+inline std::string dump(std::initializer_list<T> const& values)
+{
+	std::string result = "(";
+	for (auto value : values)
 		result += std::to_string(value) + ", ";
 	result = result.substr(0, result.size() - 2);
 	return result + ")";
@@ -46,13 +75,6 @@ inline std::string dump_map(std::map<std::string, int64_t> const& values)
 	result = result.substr(0, result.size() - 2);
 	return result + "}";
 }
-
-inline bool array_equal(torch::Tensor const& lhs, torch::Tensor const& rhs)
-{
-	return dump(lhs.sizes()) == dump(rhs.sizes());
-}
-
-#endif
 
 class Timer
 {
