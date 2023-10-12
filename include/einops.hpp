@@ -593,7 +593,7 @@ inline std::string _compactify_pattern_for_einsum(std::string const& pattern)
 } // namespace implementation
 
 /// @brief Provides combination of reordering and reduction using reader-friendly notation.
-/// @param tensor tensor of any supported library (e.g. torch, tensorflow)
+/// @param tensor tensor of any supported library (only libtorch in this version)
 /// list of tensors is also accepted, those should be of the same type and shape
 /// @param pattern string, rearrangement pattern
 /// @param reduction one of available reductions ('min', 'max', 'sum', 'mean', 'prod'), case-sensitive
@@ -639,6 +639,14 @@ auto reduce(Tensor const& tensors, std::string const& pattern, std::string const
 	}
 }
 
+/// @brief Reader-friendly smart element reordering for multidimensional tensors.
+/// This operation includes functionality of transpose (axes permutation), reshape (view), 
+/// squeeze, unsqueeze, stack, concatenate and other operations.
+/// @param tensor tensor of any supported library (only libtorch in this version)
+/// list of tensors is also accepted, those should be of the same type and shape
+/// @param pattern string, rearrangement pattern
+/// @param axes_lengths any additional specifications for dimensions
+/// @return tensor of the same type as input.
 template <typename Tensor, typename... Args>
 auto rearrange(Tensor const& tensor, std::string const& pattern, Args... axes_lengths)
 {
@@ -646,9 +654,8 @@ auto rearrange(Tensor const& tensor, std::string const& pattern, Args... axes_le
 }
 
 /// @brief Reader-friendly smart element reordering for multidimensional tensors.
-/// This operation includes functionality of transpose (axes permutation), reshape (view), 
-/// squeeze, unsqueeze, stack, concatenate and other operations.
-/// @param tensor tensor of any supported library (e.g. torch, tensorflow)
+/// This operation includes functionality of repeat, tile, broadcast functions.
+/// @param tensor tensor of any supported library (only libtorch in this version)
 /// list of tensors is also accepted, those should be of the same type and shape
 /// @param pattern string, rearrangement pattern
 /// @param axes_lengths any additional specifications for dimensions

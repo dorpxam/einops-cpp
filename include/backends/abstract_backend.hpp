@@ -21,6 +21,7 @@ public:
 	virtual inline Tensor stack_on_zeroth_dimension(std::vector<Tensor> const& list) = 0;
 
 	virtual inline Tensor arange(int64_t start, int64_t stop) = 0;
+	
 	virtual inline Tensor reduce(Tensor const& x, std::string const& operation, std::vector<int64_t> const& reduced_axes) = 0;
 	virtual inline Tensor transpose(Tensor const& x, std::vector<int64_t> const& axes) = 0;
 	virtual inline Tensor tile(Tensor const& x, std::vector<int64_t> const& repeats) = 0;

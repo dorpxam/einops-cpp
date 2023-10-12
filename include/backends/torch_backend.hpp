@@ -59,6 +59,12 @@ public:
 		return torch::stack(tensors);
 	}
 
+	template <typename Type>
+	inline Tensor arange(Type start, Type stop)
+	{
+		return torch::arange(start, stop);
+	}
+
 	inline Tensor arange(int64_t start, int64_t stop) final
 	{
 		return torch::arange(start, stop, c10::TensorOptions().dtype(torch::kInt64));
