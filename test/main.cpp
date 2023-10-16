@@ -3,6 +3,7 @@
 #include "test_examples.hpp"
 #include "test_ops.hpp"
 #include "test_parsing.hpp"
+#include "test_packing.hpp"
 
 int main()
 {
@@ -18,6 +19,7 @@ int main()
         out = check(out,   EinsumTest().run());
         out = check(out, ExamplesTest().run());
         out = check(out,      APITest().run());
+        out = check(out,  PackingTest().run());
     }
     catch (std::exception const& e)
     {

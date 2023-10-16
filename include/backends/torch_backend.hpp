@@ -4,7 +4,9 @@
 
 #include <backends/abstract_backend.hpp>
 #include <extension/tools.hpp>
+
 #include <torch/torch.h>
+using namespace torch::indexing;
 
 namespace einops {
 namespace backends {
@@ -103,7 +105,7 @@ public:
 			return y;
 		}
 		else
-			throw std::runtime_error(format("TorchBackend::reduce : Unknown reduction {}", operation).c_str());
+			throw std::runtime_error(::format("TorchBackend::reduce : Unknown reduction {}", operation).c_str());
 	}
 
 	inline Tensor transpose(Tensor const& x, std::vector<int64_t> const& axes) final
@@ -140,6 +142,46 @@ auto get_backend(Tensor const& tensor) -> std::tuple<TorchBackend, TorchBackend:
 	else
 		throw std::runtime_error("Torch backend only support torch::Tensor, torch::TensorList or a std::vector<torch::Tensor>.");
 }
+
+namespace implementation {
+
+template <typename Tensor>
+auto get_packing_backend(Tensor const& tensor) -> TorchBackend
+{
+	return TorchBackend();
+}
+
+template <typename Type>
+inline auto refarray(std::vector<Type> const& vector) -> c10::ArrayRef<Type>
+{
+	return c10::ArrayRef<Type>(vector);
+}
+
+template <typename Type>
+inline auto subvec(std::vector<Type> const& vec, int from, int to) -> std::vector<Type>
+{
+	auto lhs = vec.begin() + from;
+	auto rhs = vec.begin() + to;
+	return std::vector<Type>(lhs, rhs);
+}
+
+inline auto concat(std::vector<TensorIndex> const& vec, TensorIndex const& value) -> std::vector<TensorIndex>
+{
+	std::vector<TensorIndex> output(vec.begin(), vec.end());
+	output.push_back(value);
+	return output;
+}
+
+inline auto concat(std::vector<int64_t> const& left, std::vector<int64_t> const& mid, std::vector<int64_t> const& right) -> std::vector<int64_t>
+{
+	std::vector<int64_t> output;
+	output.insert(output.end(), left.begin(), left.end());
+	output.insert(output.end(), mid.begin(), mid.end());
+	output.insert(output.end(), right.begin(), right.end());
+	return output;
+}
+
+} // namespace implementation
 
 } // namespace backends
 } // namespace einops

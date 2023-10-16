@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cwctype>
 #include <functional>
@@ -14,6 +15,7 @@
 #include <set>
 #include <string>
 #include <type_traits>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -97,16 +99,14 @@ inline auto to_initializer_list(Iterator begin, Iterator end) -> std::initialize
 	return implementation::generate_n(begin, end, begin);
 }
 
+template <typename Type>
+inline auto to_initializer_list(std::vector<Type> const& vector) -> std::initializer_list<Type>
+{
+	return to_initializer_list(vector.begin(), vector.end());
+}
+
 template<class T, class... Rest>
 inline constexpr bool are_all_same = (std::is_same_v<T, Rest> && ...);
-
-inline auto print(std::map<std::string, int64_t> const& values) -> std::string
-{
-	std::string result;
-	for (auto&& [k, v] : values)
-		result += k + " : " + std::to_string(v) + "\n";
-	return result;
-}
 
 template <typename ...Args>
 inline auto from_map(std::map<std::string, int64_t> const& map) -> std::vector<std::tuple<std::string, int64_t>>
@@ -126,6 +126,40 @@ inline auto sort_and_reverse(std::vector<T> const& in) -> std::vector<T>
 	return out;
 }
 
+template <typename Type, typename Container, typename Lambda>
+inline auto processor(Container const& container, Lambda const& condition) -> std::vector<Type>
+{
+	std::vector<Type> output;
+	for (auto&& value : container)
+		output.push_back(condition(value));
+	return output;
+}
+
+template <typename Output, typename Type>
+inline auto sum(std::vector<Type> const& vector) -> Output
+{
+	Output result = 0;
+	for (auto&& value : vector)
+		result += value;
+	return result;
+}
+
+template <typename Type>
+inline auto prod(std::vector<Type> const& vector) -> Type
+{
+	Type result = 1;
+	for (auto&& value : vector)
+		result *= value;
+	return result;
+}
+
+template <typename Type>
+inline auto reverse(std::vector<Type>&& vector) -> std::vector<Type>
+{
+	std::reverse(vector.begin(), vector.end());
+	return vector;
+}
+
 template <typename T>
 inline auto compare(T const& lhs, T const& rhs) -> bool
 {
@@ -139,7 +173,7 @@ inline auto compare(std::vector<T> const& lhs, std::vector<T> const& rhs) -> boo
 		return false;
 	else
 	{
-		for (auto&& [lval, rval] : iter::zip(lhs, rhs))
+		for (auto&& [lval, rval] : iters::zip(lhs, rhs))
 			if (lval != rval)
 				return false;
 	}
@@ -192,13 +226,13 @@ inline auto index(std::vector<T> const& lhs, T const& rhs) -> int64_t
 template <typename T>
 inline auto index(std::vector<std::vector<T>> const& lhs, std::vector<T> const& value) -> int64_t
 {
-	for (auto&& [i, it] : iter::enumerate(lhs))
+	for (auto&& [i, it] : iters::enumerate(lhs))
 		if (it == value)
 			return i;
 	return false;
 }
 
-inline auto split(std::string const& str, std::string const& delimiter) -> std::tuple<std::string, std::string>
+inline auto divide(std::string const& str, std::string const& delimiter) -> std::tuple<std::string, std::string>
 {
 	return { str.substr(0, str.find(delimiter)),
 			 str.substr(str.find(delimiter) + delimiter.length()) };

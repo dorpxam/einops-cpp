@@ -27,6 +27,7 @@ namespace einops::implementation {
 */
 
 const auto _ellipsis = std::string("@"); // '@' instead of '…' in python
+const auto _asterisk = std::string("*");
 
 // follow the rules of the original python code, except for unicode.
 // need to investigate this point for a greater compatibility when
@@ -45,7 +46,7 @@ inline auto isidentifier(std::string const& name) -> bool
 		//			   the underscore _ and, except for the first character, 
 		//			   the digits 0 through 9.
 		// TODO:  3.x: add alpha numeric unicode support
-		for (auto&& [i, c] : iter::enumerate(name))
+		for (auto&& [i, c] : iters::enumerate(name))
 			if (!((i == 0 ? std::iswalpha(c) 
 						  : std::iswalnum(c)) || c == '_'))
 				return false;

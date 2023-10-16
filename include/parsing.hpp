@@ -14,6 +14,8 @@ public:
 	bool has_ellipsis_parenthesized{ false };
 	bool has_non_unitary_anonymous_axes{ false };
 
+	using BracketGroup = std::vector<std::string>;
+
 public:
 	ParsedExpression(std::string expression, bool allow_underscore = false, bool allow_duplicates = false)
 	{
@@ -35,7 +37,7 @@ public:
 		{
 			if (identifiers.count(x))
 				if (!(allow_underscore && x == "_") && !allow_duplicates)
-					throw Exception(format("Indexing expression contains duplicate dimension \"{}\"", x));
+					throw Exception(::format("Indexing expression contains duplicate dimension \"{}\"", x));
 
 			if (x == _ellipsis)
 			{
@@ -162,7 +164,7 @@ public:
 		else
 		{
 			if (contains(python_keyword, name))
-				std::cout << format("It is discouraged to use axes names that are keywords: {}", name) << std::endl;
+				std::cout << ::format("It is discouraged to use axes names that are keywords: {}", name) << std::endl;
 
 			if (name == "axis")
 				std::cout << "It is discouraged to use 'axis' as an axis name and will raise an error in future" << std::endl;

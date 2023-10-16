@@ -4,6 +4,9 @@
 #include <extension/hash.hpp>
 #include <extension/tools.hpp>
 
+// https://github.com/Tessil/ordered-map
+#include <thirdparty/ordered_map.h>
+
 namespace einops::implementation {
 
 using Length = int64_t;
@@ -18,11 +21,20 @@ using Reductions = std::vector<std::string>;
 
 using Identifier = std::variant<std::string, AnonymousAxis>;
 using Identifiers = std::set<Identifier>;
-using IdentifiersMap = std::map<Identifier, int64_t>;
+class IdentifierHash 
+{
+public:
+	std::size_t operator()(const Identifier& value) const 
+	{
+		return value.index() == 0
+			 ? HashBuilder()(std::get<0>(value))
+			 : HashBuilder()(std::get<1>(value).to_string());
+	}
+};
+using IdentifiersMap = tsl::ordered_map<Identifier, int64_t, IdentifierHash>;
 
 using Composition = std::vector<std::variant<std::vector<std::string>, std::string>>;
 using FlatComposition = std::vector<std::string>;
-using BracketGroup = std::vector<std::string>;
 
 using Axis = int64_t;
 using Axes = std::vector<int64_t>;
@@ -66,9 +78,27 @@ inline auto print(int64_t value) -> std::string
 
 inline auto print(std::vector<int64_t> const& values) -> std::string
 {
-	std::string result;
+	std::string result = "{ ";
 	for (auto&& value : values)
-		result += print(value);
+		result += print(value) + ", ";
+	result = result.substr(0, result.size() - 2);
+	return result + " }";
+}
+
+inline auto print(std::vector<std::vector<int64_t>> const& values) -> std::string
+{
+	std::string result = "{ ";
+	for (auto&& value : values)
+		result += print(value) + ", ";
+	result = result.substr(0, result.size() - 2);
+	return result + " }";
+}
+
+inline auto print(std::map<std::string, int64_t> const& values) -> std::string
+{
+	std::string result;
+	for (auto&& [k, v] : values)
+		result += k + " : " + std::to_string(v) + "\n";
 	return result;
 }
 
@@ -107,6 +137,14 @@ inline auto print(AxesLengths const& values) -> std::string
 	return result;
 }
 
+inline auto print(std::set<std::string> const& ids) -> std::string
+{
+	std::vector<std::string> values;
+	for (auto&& x : ids)
+		values.push_back(x);
+	return "[" + join(values, ", ") + "]";
+}
+
 // few other helpers
 
 inline auto values(Identifiers const& identifiers) -> std::vector<int64_t>
@@ -125,9 +163,9 @@ inline auto values(IdentifiersMap const& identifiers) -> std::vector<int64_t>
 	return axes;
 }
 
-inline auto list(Composition const& composition) -> BracketGroup
+inline auto list(Composition const& composition) -> std::vector<std::string>
 {
-	BracketGroup output;
+	std::vector<std::string> output;
 	for (auto&& comp : composition)
 	{
 		if (comp.index() == 0)

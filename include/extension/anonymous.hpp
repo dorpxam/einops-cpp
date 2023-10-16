@@ -13,14 +13,14 @@ public:
 		: value(axis)
 		, uuid(++_UUID)
 	{
-		TEST();
+		check();
 	}
 
 	AnonymousAxis(std::string const& axis)
 		: value(std::stoll(axis))
 		, uuid(++_UUID)
 	{
-		TEST();
+		check();
 	}
 
 	AnonymousAxis(AnonymousAxis const& other)
@@ -55,6 +55,11 @@ public:
 		return to_string();
 	}
 
+	const void* to_uuid() const
+	{
+		return reinterpret_cast<const void*>(&uuid);
+	}
+
 	friend bool operator==(AnonymousAxis const& lhs, AnonymousAxis const& rhs);
 	friend bool operator!=(AnonymousAxis const& lhs, AnonymousAxis const& rhs);
 
@@ -62,7 +67,7 @@ private:
 	int64_t value;
 	uint64_t uuid;
 
-	inline void TEST()
+	inline void check()
 	{
 		if (value <= 1)
 		{

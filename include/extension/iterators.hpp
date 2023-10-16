@@ -3,7 +3,7 @@
 #include <tuple>
 #include <iterator>
 
-namespace iter {
+namespace iters {
 
 // Chaining function for range-based for loop
 // https://codereview.stackexchange.com/questions/98680/chaining-function-for-range-based-for-loop
@@ -391,4 +391,4 @@ auto zip(T && ... t)
     return details::zipper<T ...>{std::forward<T>(t)...};
 }
 
-} // namespace iter
+} // namespace iters

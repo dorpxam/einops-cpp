@@ -44,14 +44,14 @@ public:
         auto x = arange_and_reshape({ 2 * 3 * 4 * 5 * 6 }, { 2, 3, 4, 5, 6 });
         
         for (auto&& pattern : identity_patterns)
-            TESTB(array_equal(x, ::rearrange(x, pattern)));
+            TESTB(array_equal(x, rearrange(x, pattern)));
 
         for (auto&& [pattern1, pattern2] : equivalent_rearrange_patterns)
-            TESTB(array_equal(::rearrange(x, pattern1), ::rearrange(x, pattern2)));
+            TESTB(array_equal(rearrange(x, pattern1), rearrange(x, pattern2)));
 
         for (auto&& reduction : { "min", "max", "sum" })
             for (auto&& [pattern1, pattern2] : equivalent_reduction_patterns)
-                TESTB(array_equal(::reduce(x, pattern1, reduction), ::reduce(x, pattern2, reduction)));
+                TESTB(array_equal(reduce(x, pattern1, reduction), reduce(x, pattern2, reduction)));
     }
 
     void test_list() final

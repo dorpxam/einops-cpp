@@ -27,16 +27,16 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 	if (_transformRecipeCache.exists(hash))
 		return _transformRecipeCache.get(hash);
 
-	auto&& [left_str, rght_str] = split(pattern, "->");
+	auto&& [left_str, rght_str] = divide(pattern, "->");
 
 	auto left = ParsedExpression(left_str);
 	auto rght = ParsedExpression(rght_str);
 
 	if (!left.has_ellipsis && rght.has_ellipsis)
-		throw Exception(format("Ellipsis found in right side, but not left side of a pattern {}", pattern));
+		throw Exception(::format("Ellipsis found in right side, but not left side of a pattern {}", pattern));
 
 	if (left.has_ellipsis && left.has_ellipsis_parenthesized)
-		throw Exception(format("Ellipsis is parenthesis in the left side is not allowed: {}", pattern));
+		throw Exception(::format("Ellipsis is parenthesis in the left side is not allowed: {}", pattern));
 
 	if (operation == "rearrange")
 	{
@@ -44,7 +44,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 			throw Exception("Non-unitary anonymous axes are not supported in rearrange (exception is length 1)");
 
 		auto diff = symmetric_difference(left.identifiers, rght.identifiers);
-
+		
 		if (diff.size() > 0)
 			throw Exception(format("Identifiers only on one side of expression (should be on both): {}", print(diff)));
 	}
@@ -92,7 +92,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 
 		auto ellipsis_ndim = ndim - n_other_dims;
 		std::vector<std::string> ell_axes;
-		for (auto i : iter::range(ellipsis_ndim))
+		for (auto i : iters::range(ellipsis_ndim))
 			ell_axes.push_back(_ellipsis + std::to_string(i));
 
 		for (auto&& composite_axis : left.composition)
@@ -115,7 +115,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 			}
 			else
 			{
-				BracketGroup group;
+				std::vector<std::string> group;
 				for (auto&& axis : std::get<0>(composite_axis))
 				{
 					if (axis == _ellipsis)
@@ -167,18 +167,16 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		}
 	}
 
-	Identifiers repeat_axes_names;
 	for (auto&& axis_name : rght.identifiers)
 	{
 		if (!axis_name2known_length.count(axis_name))
 		{
 			insert_in_axis_name2known_length(axis_name);
-			repeat_axes_names.insert(axis_name);
 		}
 	}
 
 	IdentifiersMap axis_name2position;
-	for (auto&& [position, name] : iter::enumerate(axis_name2known_length))
+	for (auto&& [position, name] : iters::enumerate(axis_name2known_length))
 		axis_name2position[name.first] = position;
 
 	for (auto&& [elementary_axis, _] : axes_names)
@@ -194,10 +192,10 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 
 	InputCompositeAxes input_axes_known_unknown;
 
-	for (auto&& [i, composite_axis] : iter::enumerate(left_composition))
+	for (auto&& [i, composite_axis] : iters::enumerate(left_composition))
 	{
-		Identifiers known;
-		Identifiers unknown;
+		std::set<std::string> known;
+		std::set<std::string> unknown;
 
 		if (composite_axis.index() == 0)
 		{
@@ -242,26 +240,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		});
 	}
 
-	IdentifiersMap axis_position_after_reduction;
-
-	for (auto&& axis_name : iter::chain(left_composition))
-	{
-		if (axis_name.index() == 0)
-		{
-			for (auto&& axis : std::get<0>(axis_name))
-				if (rght.identifiers.count(axis))
-					axis_position_after_reduction[axis] = axis_position_after_reduction.size();
-		}
-		else
-		{
-			auto&& axis = std::get<1>(axis_name);
-			if (rght.identifiers.count(axis))
-				axis_position_after_reduction[axis] = axis_position_after_reduction.size();
-		}
-	}
-
 	OutputCompositeAxes result_axes_grouping;
-
 	for (auto&& composite_axis : rght_composition)
 	{
 		if (composite_axis.index() == 0)
@@ -285,8 +264,8 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		}
 	}
 
-	auto ordered_axis_left = list(iter::chain(left_composition));
-	auto ordered_axis_rght = list(iter::chain(rght_composition));
+	auto ordered_axis_left = list(iters::chain(left_composition));
+	auto ordered_axis_rght = list(iters::chain(rght_composition));
 
 	std::vector<Identifier> reduced_axes;
 	for (auto&& axis : ordered_axis_left)
@@ -311,6 +290,11 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 	for (auto&& axis : order_after_transposition)
 		axes_permutation.push_back(index(ordered_axis_left, print(axis)));
 
+	AxesMap added_axes;
+	for (auto&& [i, axis_name] : iters::enumerate(ordered_axis_rght))
+		if (!left.identifiers.count(axis_name))
+			added_axes[i] = axis_name2position[axis_name];
+
 	Axis first_reduced_axis = order_after_transposition.size() - reduced_axes.size();
 
 	auto elementary_axes_lengths = values(axis_name2known_length);
@@ -318,11 +302,6 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 	IdentifiersMap axis_name2elementary_axis;
 	for (auto&& [axis, _] : axes_names)
 		axis_name2elementary_axis[axis] = axis_name2position[axis];
-
-	AxesMap added_axes;
-	for (auto&& [i, axis_name] : iter::enumerate(ordered_axis_rght))
-		if (!left.identifiers.count(axis_name))
-			added_axes[i] = axis_name2position[axis_name];
 
 	auto recipe = TransformRecipe
 	{
@@ -333,7 +312,7 @@ auto _prepare_transformation_recipe(Pattern const& pattern, Reduction const& ope
 		first_reduced_axis,
 		added_axes,
 		result_axes_grouping,
-		hash
+		hash // hold is own hash
 	};
 
 	_transformRecipeCache.put(hash, recipe);
@@ -350,7 +329,7 @@ inline auto _reconstruct_from_shape_uncached(TransformRecipe const& self, Shape 
 	for (auto&& [axis, dim] : axes_dims)
 		axes_lengths[self.axis_name2elementary_axis.at(axis)] = dim;
 
-	for (auto&& [input_axis, known_unknown_axes] : iter::enumerate(self.input_composition_known_unknown))
+	for (auto&& [input_axis, known_unknown_axes] : iters::enumerate(self.input_composition_known_unknown))
 	{
 		auto&& [known_axes, unknown_axes] = known_unknown_axes;
 		auto length = shape[input_axis];
@@ -406,12 +385,12 @@ inline auto _reconstruct_from_shape_uncached(TransformRecipe const& self, Shape 
 	for (auto&& [pos, pos_in_elementary] : self.added_axes)
 		added_axes[pos] = axes_lengths[pos_in_elementary];
 
-	Axes reduced_axes = iter::range<Axis>(self.first_reduced_axis, self.axes_permutation.size()).vec();
+	Axes reduced_axes = iters::range<Axis>(self.first_reduced_axis, self.axes_permutation.size()).vec();
 	
 	Axis n_axes_after_adding_axes = added_axes.size() + self.axes_permutation.size();
 
 	OptionalAxes axes_reordering = self.axes_permutation;
-	if (compare<Axis>(self.axes_permutation, iter::range<Axis>(self.axes_permutation.size()).vec()))
+	if (compare<Axis>(self.axes_permutation, iters::range<Axis>(self.axes_permutation.size()).vec()))
 		axes_reordering = std::nullopt;
 
 	OptionalAxes _final_shapes = std::nullopt;
@@ -439,13 +418,13 @@ inline auto _reconstruct_from_shape(TransformRecipe const& self, Shape const& sh
 
 inline auto _prepare_recipes_for_all_dims(Pattern const& pattern, Reduction const& operation, AxesLengths const& axes_names) -> std::map<int64_t, TransformRecipe>
 {
-	auto&& [left_str, _] = split(pattern, "->");
+	auto&& [left_str, _] = divide(pattern, "->");
 	auto&& left = ParsedExpression(left_str);
 	auto&& dims = Axes{ (Axis)left.composition.size() };
 	if (left.has_ellipsis)
 	{
 		dims.clear();
-		for (auto ellipsis_dims : iter::range(8))
+		for (auto ellipsis_dims : iters::range(8))
 			dims.push_back(left.composition.size() - 1 + ellipsis_dims);
 	}
 	std::map<int64_t, TransformRecipe> output;
@@ -526,7 +505,7 @@ inline std::string _compactify_pattern_for_einsum(std::string const& pattern)
 	if (!contains(pattern, "->"))
 		throw Exception("Einsum pattern must contain '->'.");
 
-	auto [lefts_str, right_str] = split(pattern, "->");
+	auto [lefts_str, right_str] = divide(pattern, "->");
 
 	auto lefts_strs = splits(lefts_str, ",");
 	std::vector<ParsedExpression> lefts;
@@ -632,10 +611,10 @@ auto reduce(Tensor const& tensors, std::string const& pattern, std::string const
 	}
 	catch (Exception const& e)
 	{
-		auto message  = format("\n\n Error while processing {}-reduction pattern \"{}\".", reduction, pattern);
-			 message += format("\n Input tensor shape: {}. ", print(shape));
-			 message += format("Additional info: {}.", print(hashable_axes_lengths));
-		throw Exception(message + format("\n {}", e.what()));
+		auto message  = ::format("\n\n Error while processing {}-reduction pattern \"{}\".", reduction, pattern);
+			 message += ::format("\n Input tensor shape: {}. ", print(shape));
+			 message += ::format("Additional info: {}.", print(hashable_axes_lengths));
+		throw Exception(message + ::format("\n {}", e.what()));
 	}
 }
 
@@ -687,7 +666,7 @@ auto einsum(std::string const& pattern, Tensor... tensor)
 /// @param pattern string, space separated names for axes, underscore means skip axis
 /// @return map of axes names to their lengths
 template <typename Tensor>
-inline auto parse_shape(Tensor const& tensor, std::string const& pattern) -> implementation::AxesLengthsMap
+inline auto parse_shape(Tensor const& tensor, std::string const& pattern)
 {
 	using namespace implementation;
 	auto exp = ParsedExpression(pattern, true);
@@ -718,12 +697,12 @@ inline auto parse_shape(Tensor const& tensor, std::string const& pattern) -> imp
 	{
 		size_t ellipsis_idx = index(composition, _ellipsis);
 						     remove(composition,  ellipsis_idx);
-		for (auto i : iter::range(shape.size() - composition.size() + 1))
+		for (auto i : iters::range(shape.size() - composition.size() + 1))
 			insert(composition, ellipsis_idx, "_");
 
 	}
 	AxesLengthsMap result;
-	for (auto [axis_name, axis_length] : iter::zip(composition, shape))
+	for (auto [axis_name, axis_length] : iters::zip(composition, shape))
 	{
 		if (axis_name != "_")
 			result[axis_name] = axis_length;

@@ -1,6 +1,6 @@
 ![Static Badge](https://img.shields.io/badge/github-einops--cpp-red?style=flat-square&logo=github)
 ![Static Badge](https://img.shields.io/badge/license-MIT-yellow?style=flat-square)
-![Static Badge](https://img.shields.io/badge/release-v0.1a-blue?style=flat-square&color=blue)
+![Static Badge](https://img.shields.io/badge/release-v0.2-blue?style=flat-square&color=blue)
 ![Static Badge](https://img.shields.io/badge/build-passing-green?style=flat-square)
 
 # einops-cpp - C++ port of einops for libtorch backend
@@ -15,6 +15,9 @@ Just put the `'include'` directory on your compiler path and add the following l
 ```cpp
 #include <einops.hpp>
 ```
+
+However, the project includes in is thirdparty directory the great python's **OrderedDict** as ordered-map,
+a C++ header-only implementation from Tessil's [github](https://github.com/Tessil/ordered-map).
 
 ## Build
 
@@ -43,6 +46,7 @@ All the following methods in the public C++ API are documented. For a better und
 
 - [x] Follow the code of the python release `v0.7.0` [release](https://github.com/arogozhnikov/einops/releases/tag/v0.7.0)
 - [x] Implements the `reduce()`, `rearrange()`, `repeat()`, `einsum()` and `parse_shape()` methods.
+- [x] Implements the `pack()`, `unpack()` methods.
 - [ ] Finalize the code of the `Rearrange`, `Reduce` and `EinMix` layers (aka `torch::Module`)
 - [ ] Benchmark the LRU cache in few internal methods
 - [ ] Optimize the code where possible (limit potential overhead)
